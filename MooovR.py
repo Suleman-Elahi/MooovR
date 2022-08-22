@@ -13,7 +13,7 @@ class Ui(QtWidgets.QMainWindow):
     def __init__(self):
         
         super(Ui, self).__init__()
-        uic.loadUi(r'.\MooovR.ui', self)
+        uic.loadUi('MooovR.ui', self)
         self.show()
         self.srcF.setFocus()
         self.start_moving.clicked.connect(self.startMooovR)
