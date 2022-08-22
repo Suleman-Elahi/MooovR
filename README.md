@@ -3,7 +3,7 @@ A cross-platform high performance file copier that can work copy multiple files 
 
 <p align="center">
 
-    <img src="https://github.com/Suleman-Elahi/MooovR/raw/main/img/MooovR_Action.png" alt="MooovR Screenshot">
+    ![MooovR in Action](https://github.com/Suleman-Elahi/MooovR/raw/main/img/MooovR_Action.png)
 </p>
 
 Icon Credits: <a href="https://iconscout.com/icon/copy-5682417">Madhu/Iconscout</a>
