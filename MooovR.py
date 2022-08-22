@@ -1,21 +1,25 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 from PyQt5 import QtWidgets, uic
 import os, sys
 import glob
 import shutil, pathlib
 
 class Ui(QtWidgets.QMainWindow):
-
-    op1 = op2 = op = ''
-
+    
+    progres = flag = 0
+    
     def __init__(self):
+        
         super(Ui, self).__init__()
-        uic.loadUi(r'C:\Users\sul00\Desktop\MooovR.ui', self)
+        uic.loadUi(r'.\MooovR.ui', self)
         self.show()
+        self.srcF.setFocus()
         self.start_moving.clicked.connect(self.startMooovR)
         
     def get_files(self, path):
+        
         filenames = []
         files = glob.glob(path + '\**', recursive=True)
         for file in files:
@@ -23,6 +27,10 @@ class Ui(QtWidgets.QMainWindow):
         return filenames
         
     def copyFile(self, src,dst,buffer_size=10485760,perserveFileDate=True):
+        
+        self.flag +=1
+        self.filename.setText(src)
+        self.mooovr_progress.setValue(int((self.flag/self.progres)*100))
         (dstParent, dstFileName) = os.path.split(dst)
         if not os.path.exists(dstParent):
             os.makedirs(dstParent)
@@ -46,25 +54,20 @@ class Ui(QtWidgets.QMainWindow):
             shutil.copystat(src, dst)
             
     def cpDir(self, src, dst):
-        p = ''
+        
         files = self.get_files(src)
         for each_file in files:
             if os.path.isfile(each_file):
-                p = pathlib.Path(each_file)
-                dst_new = dst + '\\'+str(pathlib.Path(*p.parts[2:]))
+                dst_new = self.get_new_dst_path(src, each_file, dst)
                 self.copyFile(each_file, dst_new)
-                print ('Copying ', each_file, ' .....', 'to ', dst_new)
-
-    def getSrc(self):
-        srcs = self.srcF.toPlainText().split("\n")
-        srcs.pop()
-        print ("sources: ", srcs, len(srcs)) 
-        return srcs
-    
-    def getDst(self):
-        dsts = self.dstF.toPlainText().split("\n")
-        print ("destinations: ", dsts) 
-        return dsts
+        
+    def get_new_dst_path(self, input_folder, new, dst):
+        
+       sp = list(pathlib.Path(input_folder).parts)
+       spn = list(pathlib.Path(new).parts)
+       stem_index_insource = len(sp) -1
+       spn = spn[stem_index_insource:]
+       return os.path.join(dst, *spn)
     
     def getTotalFiles(self, src_list):
         count = 0
@@ -73,19 +76,26 @@ class Ui(QtWidgets.QMainWindow):
         return count
     
     def startMooovR(self):
-
-        src = self.getSrc()
-        total_files = self.getTotalFiles(src)
-        dst = self.getDst()
         
+        self.mooovr_progress.setValue(0)
+        src = self.srcF.toPlainText().split("\n")
+        dst = self.dstF.toPlainText().split("\n")
+        
+        if src[0] == "":
+            print("No input or output destinations specified!")
+            sys.exit(1)
+
+        self.progres = int(self.getTotalFiles(src))
+            
         for it, i in enumerate(src):
             if os.path.isdir(i):
                 for j in range(len(dst)):
                     self.cpDir(i, dst[j])
             else:
                 for j in range(len(dst)):
-                    self.copyFile(i,dst[j])
-            self.mooovr_progress.setValue(floor((total_files/(it+1))))
+                    self.copyFile(i,os.path.join(dst[j], pathlib.Path(i).name))
+        self.mooovr_progress.setValue(100)
+        self.flag = 0
         
 app = QtWidgets.QApplication(sys.argv)
 window = Ui()
